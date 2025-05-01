@@ -1,5 +1,5 @@
 # 1. Базовый образ для сборки
-FROM eclipse-temurin:17-jdk-jammy AS builder
+FROM eclipse-temurin:21-jdk-jammy AS builder
 
 # 2. Рабочая директория
 WORKDIR /app
