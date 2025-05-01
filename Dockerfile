@@ -1,30 +1,33 @@
-# 1. Базовый образ для сборки
+# Используем LTS-версию Java 17
 FROM eclipse-temurin:17-jdk-jammy AS builder
 
-# 2. Рабочая директория
+# Устанавливаем рабочую директорию
 WORKDIR /app
 
-# 3. Копируем ВСЕ необходимые файлы для сборки
+# Копируем файлы для сборки
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 COPY src ./src
 
-# 4. Даем права на выполнение mvnw
+# Даем права на выполнение mvnw
 RUN chmod +x mvnw
 
-# 5. Собираем проект
+# Скачиваем зависимости (кешируем этот слой)
+RUN ./mvnw dependency:go-offline
+
+# Собираем проект
 RUN ./mvnw clean package -DskipTests
 
-# 6. Финальный образ
+# Финальный образ
 FROM eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
 
-# 7. Копируем только JAR из стадии builder
+# Копируем собранный JAR
 COPY --from=builder /app/target/*.jar app.jar
 
-# 8. Порт приложения
+# Открываем порт
 EXPOSE 8080
 
-# 9. Точка входа
+# Запускаем приложение
 ENTRYPOINT ["java", "-jar", "app.jar"]
